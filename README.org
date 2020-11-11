@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Numerical Experiment Data Recorder
+#+Author: Dou Meishi
+#+STARTUP: indent
+#+STARTUP: overview
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://gongzhitaao.org/orgcss/org.css"/>
+
