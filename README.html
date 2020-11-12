@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Numerical Experiment Data Recorder</title>
-<!-- 2020-11-12 四 09:56 -->
+<!-- 2020-11-12 四 16:42 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Dou Meishi" />
@@ -168,9 +168,7 @@ Designed for linux (might be portable).
 <ul class="org-ul">
 <li><code>Python</code>, command <code>python3</code> should be available
 </li>
-<li><code>MySQL</code>, relational database management system
-</li>
-<li><code>pymysql</code>, database api
+<li><code>sqlite3</code>, relational database management system
 </li>
 <li><code>git</code>, record your script
 </li>
@@ -183,6 +181,29 @@ Designed for linux (might be portable).
 <div class="outline-text-2" id="text-2">
 <p>
 Two ways are provided, while one need modify your code and the other needn't. But in both cases, we assume current directory is a git repository. 
+</p>
+
+<p>
+<code>nedr</code> will maintain a table named <code>Records</code> of a SQLite database (default name is <code>record.db</code>) in current directory. We create table with following columns at first:
+</p>
+
+<ul class="org-ul">
+<li>recordID. It's the primary key of that table. 
+</li>
+<li>commitID. It's the last commit ID of the git repository
+</li>
+<li>date. It's the time when a record is created.
+</li>
+<li>calculator. It's the name of the script that do the computations.
+</li>
+<li>datapath. It's the directory where numerical results are saved.
+</li>
+<li>description. It's the text description of a record.
+</li>
+</ul>
+
+<p>
+And when needed, new column will be created for storing parameters of experiments, though only <code>int</code> and <code>float</code> type are allowed. 
 </p>
 </div>
 
@@ -241,7 +262,7 @@ Import this module in <code>Python</code> and call method <code>nedr.register(..
 </div>
 
 <p>
-And after that you can also call <code>nedr.get_datapath(recordID)</code> to get the same datapath. Method <code>nedr.delete_record(recordID)</code> remove a record from database and delete all files in the corresponding datapath. Though these methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
+And after that you can call <code>nedr.get_datapath(recordID)</code> to get the same datapath. Method <code>nedr.delete_record(recordID)</code> is used to remove a record from database and delete all files in the corresponding datapath. Though these methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
 </p>
 </div>
 </div>
@@ -280,9 +301,8 @@ There are several module level variable controlling above behaviors:
 <pre class="src src-python"><span style="color: #268bd2;">_conf</span> = {}
 
 <span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'dbname'</span>] = <span style="color: #2aa198;">'record.db'</span> <span style="color: #93a1a1;"># </span><span style="color: #93a1a1;">file name of the database</span>
-<span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'tbname'</span>] = <span style="color: #2aa198;">'Records'</span> <span style="color: #93a1a1;"># </span><span style="color: #93a1a1;">table name of which we store records in.</span>
 <span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'datadir'</span>] = <span style="color: #2aa198;">'.data/'</span> <span style="color: #93a1a1;"># </span><span style="color: #93a1a1;">where to store computation results</span>
-<span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'path_name_fmt'</span>] = _conf[<span style="color: #2aa198;">'datadir'</span>] + <span style="color: #2aa198;">'nedr-{data}-{id}/'</span>
+<span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'path_name_fmt'</span>] = <span style="color: #2aa198;">'nedr-{today}-{recordID}/'</span>
 </pre>
 </div>
 
@@ -294,7 +314,7 @@ Whenever the module initializes, it will create <code>_conf</code> dict as above
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Dou Meishi</p>
-<p class="date">Created: 2020-11-12 四 09:56</p>
+<p class="date">Created: 2020-11-12 四 16:42</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

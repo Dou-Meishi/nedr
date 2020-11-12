@@ -11,12 +11,22 @@ Designed for linux (might be portable).
 
 * Dependency
 + ~Python~, command ~python3~ should be available
-+ ~MySQL~, relational database management system
-+ ~pymysql~, database api
++ ~sqlite3~, relational database management system
 + ~git~, record your script
 
 * Usage
 Two ways are provided, while one need modify your code and the other needn't. But in both cases, we assume current directory is a git repository. 
+
+~nedr~ will maintain a table named ~Records~ of a SQLite database (default name is ~record.db~) in current directory. We create table with following columns at first:
+
++ recordID. It's the primary key of that table. 
++ commitID. It's the last commit ID of the git repository
++ date. It's the time when a record is created.
++ calculator. It's the name of the script that do the computations.
++ datapath. It's the directory where numerical results are saved.
++ description. It's the text description of a record.
+
+And when needed, new column will be created for storing parameters of experiments, though only ~int~ and ~float~ type are allowed. 
 
 ** process level
 
@@ -71,9 +81,8 @@ There are several module level variable controlling above behaviors:
 _conf = {}
 
 _conf['dbname'] = 'record.db' # file name of the database
-_conf['tbname'] = 'Records' # table name of which we store records in.
 _conf['datadir'] = '.data/' # where to store computation results
-_conf['path_name_fmt'] = 'nedr-{data}-{id}/'
+_conf['path_name_fmt'] = 'nedr-{today}-{recordID}/'
 #+END_SRC
 
 Whenever the module initializes, it will create ~_conf~ dict as above and update it using json file =~/.nedrconf= (if exists). Then it will check the existence of the database and the table in it, and create them if absent.
