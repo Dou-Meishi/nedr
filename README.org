@@ -5,3 +5,75 @@
 #+STARTUP: overview
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://gongzhitaao.org/orgcss/org.css"/>
 
+Record date, script content, parameter settings, results of the numerical experiment, etc, in a MySQL database. 
+
+Designed for linux (might be portable).
+
+* Dependency
++ ~Python~, command ~python3~ should be available
++ ~MySQL~, relational database management system
++ ~pymysql~, database api
++ ~git~, record your script
+
+* Usage
+Two ways are provided, while one need modify your code and the other needn't. But in both cases, we assume current directory is a git repository. 
+
+** process level
+
+  run following command:
+
+  #+BEGIN_SRC bash
+nedr <calculator.py> --config <paras.json> --desc <description> --data <results.data> ...
+  #+END_SRC
+
+  where
+
+  + ~<calculator.py>~ the script that do the computations
+
+  + ~<paras.json>~ json file storing parameter values of this experiment
+
+  + ~<description>~ description for this experiment
+
+  + ~<result.data>~ output data(s) you want to store. If not given, set it to the newer files in current directory after executing ~<calculator.py>~. This option should be given as the last one because any string after it will be treat as a data filename.  
+
+** code level
+
+Import this module in ~Python~ and call method ~nedr.register(...)~.
+
+  #+BEGIN_SRC python
+import os
+import nedr
+
+calculator = os.path.basename(__file__)
+paras = {}
+
+datapath, recordID = nedr.register(calculator, paras, **kw)
+
+# save your result to datapath
+  #+END_SRC
+
+And after that you can call ~nedr.get_datapath(recordID)~ to get the same datapath. Method ~nedr.delete_record(recordID)~ is used to remove a record from database and delete all files in the corresponding datapath. Though these methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
+
+* Implementation
+We implement function ~register(...)~ first. As for the process level usage, ~nedr~ is actually a python script in which module ~nedr~ is imported. When ~register(calculator, paras, **kw)~ is called, it will do following things:
+
+1. get the last ~git~ commit ID. Raise warning if current git stat is not clean
+2. get date in format YY:MM:DD
+3. for ~arg_key, arg_value~ in paras, check whether column ~arg_key~ exists. If not, create a new column with that name and assign NULL to earlier records.
+4. create data path with predefined name convention.
+5. construct the record tuple.
+6. update database.
+7. return data path.
+
+There are several module level variable controlling above behaviors:
+
+#+BEGIN_SRC python
+_conf = {}
+
+_conf['dbname'] = 'record.db' # file name of the database
+_conf['tbname'] = 'Records' # table name of which we store records in.
+_conf['datadir'] = '.data/' # where to store computation results
+_conf['path_name_fmt'] = 'nedr-{data}-{id}/'
+#+END_SRC
+
+Whenever the module initializes, it will create ~_conf~ dict as above and update it using json file =~/.nedrconf= (if exists). Then it will check the existence of the database and the table in it, and create them if absent.
