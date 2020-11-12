@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Numerical Experiment Data Recorder</title>
-<!-- 2020-11-12 四 16:42 -->
+<!-- 2020-11-12 四 20:18 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Dou Meishi" />
@@ -262,7 +262,7 @@ Import this module in <code>Python</code> and call method <code>nedr.register(..
 </div>
 
 <p>
-And after that you can call <code>nedr.get_datapath(recordID)</code> to get the same datapath. Method <code>nedr.delete_record(recordID)</code> is used to remove a record from database and delete all files in the corresponding datapath. Though these methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
+And after that you can call <code>nedr.get_datapath(recordID)</code> to get the same datapath. Though this methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
 </p>
 </div>
 </div>
@@ -302,19 +302,18 @@ There are several module level variable controlling above behaviors:
 
 <span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'dbname'</span>] = <span style="color: #2aa198;">'record.db'</span> <span style="color: #93a1a1;"># </span><span style="color: #93a1a1;">file name of the database</span>
 <span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'datadir'</span>] = <span style="color: #2aa198;">'.data/'</span> <span style="color: #93a1a1;"># </span><span style="color: #93a1a1;">where to store computation results</span>
-<span style="color: #268bd2;">_conf</span>[<span style="color: #2aa198;">'path_name_fmt'</span>] = <span style="color: #2aa198;">'nedr-{today}-{recordID}/'</span>
 </pre>
 </div>
 
 <p>
-Whenever the module initializes, it will create <code>_conf</code> dict as above and update it using json file <code>~/.nedrconf</code> (if exists). Then it will check the existence of the database and the table in it, and create them if absent.
+Whenever the module initializes, it will create <code>_conf</code> dict as above and update it using json file <code>~/.nedrconf</code> (if exists). Then it will check the existence of the database, datadir and table in it, and create them if absent.
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Dou Meishi</p>
-<p class="date">Created: 2020-11-12 四 16:42</p>
+<p class="date">Created: 2020-11-12 四 20:18</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

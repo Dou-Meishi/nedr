@@ -62,7 +62,7 @@ datapath, recordID = nedr.register(calculator, paras, **kw)
 # save your result to datapath
   #+END_SRC
 
-And after that you can call ~nedr.get_datapath(recordID)~ to get the same datapath. Method ~nedr.delete_record(recordID)~ is used to remove a record from database and delete all files in the corresponding datapath. Though these methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
+And after that you can call ~nedr.get_datapath(recordID)~ to get the same datapath. Though this methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
 
 * Implementation
 We implement function ~register(...)~ first. As for the process level usage, ~nedr~ is actually a python script in which module ~nedr~ is imported. When ~register(calculator, paras, **kw)~ is called, it will do following things:
@@ -82,7 +82,6 @@ _conf = {}
 
 _conf['dbname'] = 'record.db' # file name of the database
 _conf['datadir'] = '.data/' # where to store computation results
-_conf['path_name_fmt'] = 'nedr-{today}-{recordID}/'
 #+END_SRC
 
-Whenever the module initializes, it will create ~_conf~ dict as above and update it using json file =~/.nedrconf= (if exists). Then it will check the existence of the database and the table in it, and create them if absent.
+Whenever the module initializes, it will create ~_conf~ dict as above and update it using json file =~/.nedrconf= (if exists). Then it will check the existence of the database, datadir and table in it, and create them if absent.
