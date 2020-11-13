@@ -14,6 +14,11 @@ setup(
     long_description = long_description,
     url = "https://github.com/Dou-Meishi/nedr",
     packages = ['nedr'],
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: POSIX :: Linux"
+    ],
     python_requires='>=3.6'
 )
 
