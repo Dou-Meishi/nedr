@@ -11,7 +11,7 @@ _conf = {}
 def init():
     '''
     initializing module:
-        1. create and update _conf 
+        1. initialize and update _conf
         2. create table if not exists
         3. create datadir if not exists
     '''
@@ -48,9 +48,9 @@ CREATE TABLE IF NOT EXISTS Records
 init()
 
 
-def register(calculator, paras, **kw):
+def register(calculator, paras, *, description=None, **kw):
     '''
-    insert a record to table as following:
+    insert a record to table as follows:
         1. get git commitID (Warning if git status is not clean)
         2. add column if needed
         3. construct record tuple 
@@ -58,21 +58,16 @@ def register(calculator, paras, **kw):
 
     return datapath of that record.
     '''
+    conn = sqlite3.connect(_conf['dbname'], detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+    cursor = conn.cursor()
 
     commitID = _check_git_commitID()
 
     date = datetime.datetime.now()
 
-    _add_columns(paras)
+    _add_columns(paras, conn)
 
-    datapath = _generate_datapath()
-
-    description = None
-    if 'description' in kw:
-        description = kw['description']
-
-    conn = sqlite3.connect(_conf['dbname'], detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
-    cursor = conn.cursor()
+    datapath = _generate_datapath(conn)
 
     cursor.execute('''
     INSERT INTO Records (commitID, date, calculator, datapath, description)
@@ -106,7 +101,6 @@ def get_datapath(recordID):
     return datapath
 
 
-
 def _check_git_commitID():
     '''return the last git commitID. Warning if git status is not clean.'''
     status = subprocess.run(['git', 'status', '-s'], stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
@@ -117,9 +111,8 @@ def _check_git_commitID():
     return commitID
 
 
-def _add_columns(paras):
+def _add_columns(paras, conn):
     '''add column named with key in paras if not exists'''
-    conn = sqlite3.connect(_conf['dbname'], detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
     cursor = conn.cursor()
 
     cursor.execute('SELECT * FROM Records')
@@ -134,13 +127,10 @@ def _add_columns(paras):
                 dtype = 'REAL'
 
             cursor.execute('ALTER TABLE Records ADD %s %s'%(arg_key, dtype))
-    conn.commit()
-    conn.close()
 
 
-def _generate_datapath():
+def _generate_datapath(conn):
     '''return a directory (create it if not exists) for storing data.'''
-    conn = sqlite3.connect(_conf['dbname'], detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
     cursor = conn.cursor()
 
     cursor.execute('SELECT MAX(recordID) FROM Records')
@@ -151,7 +141,7 @@ def _generate_datapath():
     datapath = _conf['datadir']+'{}-{}/'.format(today, n)
 
     if not os.path.exists(datapath):
+        print('mkdir', datapath)
         os.mkdir(datapath)
 
-    conn.close()
     return datapath
