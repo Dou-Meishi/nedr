@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+
+import argparse
+import json
+import nedr
+import os
+import subprocess
+
+# parse args
+
+parser = argparse.ArgumentParser(description='nedr command')
+
+parser.add_argument('calculator', type=str,
+                    help='name of the script that do the computations')
+
+parser.add_argument('--paras', type=str, dest='paras_fn', 
+                    help='name of file storing parameters value')
+
+parser.add_argument('--desc', type=str, dest='desc', default='',
+                    help='description of this record')
+
+parser.add_argument('--data', type=str, dest='data_fns', nargs='+',
+                    help='name of data files need store')
+
+args = parser.parse_args()
+
+paras = {}
+kw = {'description': args.desc}
+
+if args.paras_fn is not None:
+    with open(args.paras, 'r', encoding='utf-8') as f:
+        paras = json.load(f)
+
+# update database
+datapath, _ = nedr.register(args.calculator, paras, **kw)
+
+for fn in args.data_fns:
+    subprocess.run(['cp', '-f', fn, datapath+fn])
+    print('data file {} copied to {}'.format(fn, datapath))

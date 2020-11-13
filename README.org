@@ -5,19 +5,34 @@
 #+STARTUP: overview
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://gongzhitaao.org/orgcss/org.css"/>
 
-Record date, script content, parameter settings, results of the numerical experiment, etc, in a MySQL database. 
+Record date, script content, parameter settings, results of the numerical experiment, etc, in a SQLite database. 
 
 Designed for linux (might be portable).
 
 * Dependency
-+ ~Python~, command ~python3~ should be available
++ ~Python~, with version after 3.6
 + ~sqlite3~, relational database management system
-+ ~git~, record your script
++ ~git~, track your script
 
+* Install and Uninstall
+To install:
+
+#+BEGIN_SRC bash
+pip3 install . --user
+#+END_SRC
+
+That command will install this package in your local ~Python~ path and create a script named ~nedr~ in directory =~/bin/=
+
+To uninstall: 
+
+#+BEGIN_SRC bash
+pip3 uninstall nedr
+rm -f ~/bin/nedr
+#+END_SRC
 * Usage
 Two ways are provided, while one need modify your code and the other needn't. But in both cases, we assume current directory is a git repository. 
 
-~nedr~ will maintain a table named ~Records~ of a SQLite database (default name is ~record.db~) in current directory. We create table with following columns at first:
+~nedr~ will update a table named ~Records~ of a SQLite database (default name is ~record.db~) in current directory. We create the table with following columns at first:
 
 + recordID. It's the primary key of that table. 
 + commitID. It's the last commit ID of the git repository
@@ -28,27 +43,35 @@ Two ways are provided, while one need modify your code and the other needn't. Bu
 
 And when needed, new column will be created for storing parameters of experiments, though only ~int~ and ~float~ type are allowed. 
 
-** process level
+** Use provided script directly
 
-  run following command:
+Once you have successfully installed this package, a python script named ~nedr~ should appear in directory =~/bin/=. You can use that script like follows: 
 
-  #+BEGIN_SRC bash
-nedr <calculator.py> --config <paras.json> --desc <description> --data <results.data> ...
-  #+END_SRC
+#+BEGIN_SRC bash
+nedr <calculator.py> --paras <paras.json> --desc <description> --data <results.data> ...
+#+END_SRC
 
-  where
+where
 
-  + ~<calculator.py>~ the script that do the computations
++ ~<calculator.py>~ mandatory, the script that do the computations
 
-  + ~<paras.json>~ json file storing parameter values of this experiment
++ ~<paras.json>~ optional, json file stores parameter values of this experiment
 
-  + ~<description>~ description for this experiment
++ ~<description>~ optional, description for this experiment
 
-  + ~<result.data>~ output data(s) you want to store. If not given, set it to the newer files in current directory after executing ~<calculator.py>~. This option should be given as the last one because any string after it will be treat as a data filename.  
++ ~<result.data>~ mandatory, output data(s) you want to store. If not given, set it to the newer files in current directory after executing ~<calculator.py>~. This option should be given as the last one because any string after it will be treat as a data filename.  
 
-** code level
+For example, if you have run a script ~./calc.py~ and get some output file ~./output1.data, ./output2.data~ that you want to store with some parameter values set in this numerical experiment. You can first store the parameter settings in a json file ~./paras.json~ and run following command:
 
-Import this module in ~Python~ and call method ~nedr.register(...)~.
+#+BEGIN_SRC bash
+nedr ./calc.py --paras paras.json --desc "test script" --data output1.data output2.data
+#+END_SRC
+
+A record will be insert into table ~Records~ in database ~./record.db~, and the data files ~output1.data, output2.data~ will be copied to some directory in ~./.data/~. 
+
+** Call it in your script
+
+Import this package in ~Python~ and call method ~nedr.register(...)~.
 
   #+BEGIN_SRC python
 import os
@@ -65,15 +88,14 @@ datapath, recordID = nedr.register(calculator, paras, **kw)
 And after that you can call ~nedr.get_datapath(recordID)~ to get the same datapath. Though this methods should be rarely used. Users can directly query the database whenver they need and do whatever they want.
 
 * Implementation
-We implement function ~register(...)~ first. As for the process level usage, ~nedr~ is actually a python script in which module ~nedr~ is imported. When ~register(calculator, paras, **kw)~ is called, it will do following things:
+We implement function ~register(...)~ first. As for the direct usage, ~nedr~ is nothing but a python script in which the package ~nedr~ is import. When ~register(calculator, paras, **kw)~ is called, it will do following things:
 
-1. get the last ~git~ commit ID. Raise warning if current git stat is not clean
-2. get date in format YY:MM:DD
-3. for ~arg_key, arg_value~ in paras, check whether column ~arg_key~ exists. If not, create a new column with that name and assign NULL to earlier records.
-4. create data path with predefined name convention.
-5. construct the record tuple.
-6. update database.
-7. return data path.
+1. get the last ~git~ commit ID. Warning if current git stat is not clean
+2. for ~arg_key, arg_value~ in paras, check whether column ~arg_key~ exists. If not, create a new column with that name and assign NULL to earlier records.
+3. create data path with predefined name convention.
+4. construct the record tuple.
+5. update database.
+6. return data path.
 
 There are several module level variable controlling above behaviors:
 
