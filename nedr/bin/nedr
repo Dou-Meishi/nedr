@@ -19,7 +19,7 @@ parser.add_argument('--paras', type=str, dest='paras_fn',
 parser.add_argument('--desc', type=str, dest='desc',
                     help='description of this record')
 
-parser.add_argument('--data', type=str, dest='data_fns', nargs='+',
+parser.add_argument('--data', type=str, dest='data_fns', nargs='*',
                     help='name of data files need store')
 
 args = parser.parse_args()
@@ -30,9 +30,11 @@ if args.paras_fn is not None:
     with open(args.paras, 'r', encoding='utf-8') as f:
         paras = json.load(f)
 
+
 # update database
 datapath, _ = nedr.register(args.calculator, paras, description=args.desc)
 
-for fn in args.data_fns:
-    subprocess.run(['cp', '-f', fn, datapath+fn])
-    print('data file {} copied to {}'.format(fn, datapath))
+if args.data_fns is not None:
+    for fn in args.data_fns:
+        subprocess.run(['cp', '-f', fn, datapath+fn])
+        print('data file {} copied to {}'.format(fn, datapath))
