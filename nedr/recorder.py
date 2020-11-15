@@ -87,9 +87,12 @@ def register(calculator, paras, *, description=None, **kw):
     return datapath, recordID
 
 
-def get_datapath(recordID):
+def get_datapath(recordID, remove_record=False):
     '''return datapath of recordID. 
-    Raise ValueError if record not found'''
+    If remove_record is True, remove that record from database.
+    Raise ValueError if record not found.
+
+    Note: we do not delete files under that datapath.'''
     conn = sqlite3.connect(_conf['dbname'], detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
     cursor = conn.cursor()
     cursor.execute('''SELECT datapath FROM Records 
@@ -97,6 +100,10 @@ def get_datapath(recordID):
     datapath = cursor.fetchone()[0]
     if datapath is None:
         raise ValueError('record not exist')
+    if remove_record:
+        cursor.execute('''DELETE FROM Records
+        WHERE recordID=?''', (recordID,))
+        conn.commit()
     conn.close()
     return datapath
 
