@@ -65,6 +65,7 @@ def register(calculator, paras, *, description=None, **kw):
 
     date = datetime.datetime.now()
 
+    paras = _ensure_safety(paras)
     _add_columns(paras, conn)
 
     datapath = _generate_datapath(conn)
@@ -118,6 +119,15 @@ def _check_git_commitID():
     return commitID
 
 
+def _ensure_safety(paras):
+    '''prevent injection from paras' keys'''
+    safe_paras = {}
+    for k, v in paras.items():
+        new_k = str(k).replace(' ', '')
+        safe_paras[new_k] = v
+    return safe_paras
+
+
 def _add_columns(paras, conn):
     '''add column named with key in paras if not exists'''
     cursor = conn.cursor()
@@ -127,11 +137,13 @@ def _add_columns(paras, conn):
 
     for arg_key, arg_value in paras.items():
         if arg_key not in column_names:
-            if type(arg_value) == int:
+            if isinstance(arg_value, int):
                 dtype = 'INT'
-            else:
-                arg_value = float(arg_value)
+            elif isinstance(arg_value, float):
                 dtype = 'REAL'
+            else:
+                arg_value = str(arg_value)
+                dtype = 'TEXT'
 
             cursor.execute('ALTER TABLE Records ADD %s %s'%(arg_key, dtype))
 
