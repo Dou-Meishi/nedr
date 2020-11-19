@@ -27,7 +27,7 @@ args = parser.parse_args()
 paras = {}
 
 if args.paras_fn is not None:
-    with open(args.paras, 'r', encoding='utf-8') as f:
+    with open(args.paras_fn, 'r', encoding='utf-8') as f:
         paras = json.load(f)
 
 
