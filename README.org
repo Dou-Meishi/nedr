@@ -38,10 +38,10 @@ Two ways are provided, while one need modify your code and the other needn't. Bu
 + commitID. It's the last commit ID of the git repository
 + date. It's the time when a record is created.
 + calculator. It's the name of the script that do the computations.
-+ datapath. It's the directory where numerical results are saved.
++ datapath. It's the directory where numerical results will be saved.
 + description. It's the text description of a record.
 
-And when needed, new column will be created for storing parameters of experiments, though only ~int~ and ~float~ type are allowed. 
+And when needed, new column will be created for storing parameters of experiments, though only ~int, float, str~ are supported. 
 
 ** Use provided script directly
 
@@ -59,7 +59,7 @@ where
 
 + ~<description>~ optional, description for this experiment
 
-+ ~<result.data>~ mandatory, output data(s) you want to store. If not given, set it to the newer files in current directory after executing ~<calculator.py>~. This option should be given as the last one because any string after it will be treat as a data filename.  
++ ~<result.data>~ mandatory, output data(s) you want to store. This option should be given as the last one because any string after it will be treat as a data filename. 
 
 For example, if you have run a script ~./calc.py~ and get some output file ~./output1.data, ./output2.data~ that you want to store with some parameter values set in this numerical experiment. You can first store the parameter settings in a json file ~./paras.json~ and run following command:
 
@@ -91,11 +91,12 @@ And after that you can call ~nedr.get_datapath(recordID)~ to get the same datapa
 We implement function ~register(...)~ first. As for the direct usage, ~nedr~ is nothing but a python script in which the package ~nedr~ is import. When ~register(calculator, paras, **kw)~ is called, it will do following things:
 
 1. get the last ~git~ commit ID. Warning if current git stat is not clean
-2. for ~arg_key, arg_value~ in paras, check whether column ~arg_key~ exists. If not, create a new column with that name and assign NULL to earlier records.
-3. create data path with predefined name convention.
-4. construct the record tuple.
-5. update database.
-6. return data path.
+2. normalize ~arg_key~ in ~paras~ for the sake of safety.
+3. for ~arg_key, arg_value~ in ~paras~, check whether column ~arg_key~ exists. If not, create a new column with that name and assign NULL to earlier records.
+4. create data path with predefined name convention (usually ~date-recordID~).
+5. construct the record tuple.
+6. update database.
+7. return the data path.
 
 There are several module level variable controlling above behaviors:
 
