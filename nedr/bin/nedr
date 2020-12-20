@@ -37,7 +37,7 @@ datapath, recordID = nedr.register(args.calculator, paras, description=args.desc
 try:
     if args.data_fns is not None:
         for fn in args.data_fns:
-            subprocess.run(['cp', '-f', fn, datapath+fn], check=True)
+            subprocess.run(['cp', '-rf', fn, datapath+fn], check=True)
             print('data file {} copied to {}'.format(fn, datapath))
 except Exception as e:
     nedr.get_datapath(recordID, remove_record=True)
